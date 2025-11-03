@@ -1,41 +1,29 @@
-# Name of your application. Used to uniquely configure containers.
+# config/deploy.yml
 service: recipe_book
-
-# Name of the container image (Docker Hub).
 image: vicentetroncosoc/recipe_book
 
-# Deploy to these servers (usa la IP pública del droplet).
 servers:
   web:
-    - 178.128.75.254
+    hosts:
+      - 178.128.75.254   # ← tu droplet
 
-# 🔕 Sin dominio: quitamos proxy/SSL (comentado o elimina este bloque).
-# proxy:
-#   ssl: true
-#   host: app.example.com
-
-# Credentials for your image host (Docker Hub).
 registry:
-  # server: docker.io  # Docker Hub por defecto
   username: vicentetroncosoc
   password:
     - KAMAL_REGISTRY_PASSWORD
 
-# ENV para producción (secrets se definen con `kamal env push`)
 env:
-  secret:
-    - RAILS_MASTER_KEY
-    - SECRET_KEY_BASE
-    # Si usas Postgres en producción, luego agregamos:
-    - DATABASE_URL
   clear:
-    RAILS_ENV: production
+    RAILS_ENV: "production"
     RAILS_LOG_TO_STDOUT: "1"
     RAILS_SERVE_STATIC_FILES: "1"
-    SOLID_QUEUE_IN_PUMA: true
-    # WEB_CONCURRENCY: 2  # opcional
+    SOLID_QUEUE_IN_PUMA: "true"
+  # 👇 Cargamos variables desde el archivo que YA creaste
+  file:
+    - .kamal/apps/recipe_book/env/roles/web.env
+  # ❌ Nada en secret aquí para DB o SECRET_KEY_BASE.
+  #    SECRET_KEY_BASE viene de credentials via RAILS_MASTER_KEY (en web.env).
 
-# Aliases útiles
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   shell: app exec --interactive --reuse "bash"
@@ -45,8 +33,9 @@ aliases:
 accessories:
   db:
     image: postgres:16
-    host: 178.128.75.254   # tu droplet
-    port: 5432
+    host: 178.128.75.254
+    roles: [web]
+    port: "5432:5432"
     env:
       clear:
         POSTGRES_USER: recipe
@@ -55,14 +44,17 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /var/lib/postgresql/data:/var/lib/postgresql/data
+    labels:
+      service: "recipe_book-db"
 
-# Volumen para Active Storage / (y SQLite si lo usas)
 volumes:
   - "recipe_book_storage:/rails/storage"
 
-# Evita 404 de assets entre releases
-asset_path: /rails/public/assets
+healthcheck:
+  path: /up
+  interval: 3s
+  timeout: 2s
+  retries: 10
 
-# Construir imagen amd64 (tu droplet seguramente es x86_64)
 builder:
   arch: amd64
