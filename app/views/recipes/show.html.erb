@@ -1,0 +1,38 @@
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <div>
+    <h1 class="h3 mb-1"><%= @recipe.title %></h1>
+    <p class="text-muted mb-0">
+      Creada por
+      <strong>
+        <%= @recipe.user&.respond_to?(:name) && @recipe.user&.name.present? ? @recipe.user.name : @recipe.user&.email %>
+      </strong>
+      · <%= @recipe.created_at.strftime("%d %b %Y") %>
+    </p>
+  </div>
+
+  <div class="btn-group btn-group-sm" role="group">
+    <% if user_signed_in? && @recipe.user == current_user %>
+      <%= link_to edit_recipe_path(@recipe), class: "btn btn-outline-secondary" do %>
+        <i class="bi bi-pencil"></i><span class="d-none d-md-inline ms-1">Edit</span>
+      <% end %>
+      <%= link_to @recipe,
+                  data: { turbo_method: :delete, turbo_confirm: "¿Eliminar esta receta?" },
+                  class: "btn btn-outline-danger" do %>
+        <i class="bi bi-trash"></i><span class="d-none d-md-inline ms-1">Delete</span>
+      <% end %>
+    <% end %>
+    <%= link_to "Back", recipes_path, class: "btn btn-link ms-2" %>
+  </div>
+</div>
+
+<ul class="list-group mb-3">
+  <li class="list-group-item"><strong>Cook time:</strong> <%= @recipe.cook_time %> min</li>
+  <li class="list-group-item"><strong>Difficulty:</strong> <%= difficulty_badge(@recipe.difficulty) %></li>
+</ul>
+
+<div class="card">
+  <div class="card-header">Instructions</div>
+  <div class="card-body trix-content">
+    <%= @recipe.instructions %>
+  </div>
+</div>
