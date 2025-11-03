@@ -29,9 +29,8 @@ aliases:
 accessories:
   db:
     image: postgres:16
-    # expone el puerto para que puedas probar desde fuera si quieres (psql)
-    ports:
-      - "5432:5432"
+    host: 178.128.75.254
+    port: 5432
     env:
       clear:
         POSTGRES_USER: recipe
@@ -40,8 +39,6 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /var/lib/postgresql/data:/var/lib/postgresql/data
-    labels:
-      service: "recipe_book-db"
 
 volumes:
   - "recipe_book_storage:/rails/storage"
