@@ -27,7 +27,7 @@ env:
     - RAILS_MASTER_KEY
     - SECRET_KEY_BASE
     # Si usas Postgres en producción, luego agregamos:
-    # - DATABASE_URL
+    - DATABASE_URL
   clear:
     RAILS_ENV: production
     RAILS_LOG_TO_STDOUT: "1"
