@@ -4,8 +4,7 @@ image: vicentetroncosoc/recipe_book
 
 servers:
   web:
-    hosts:
-      - 178.128.75.254   # ← tu droplet
+    - 178.128.75.254
 
 registry:
   username: vicentetroncosoc
@@ -18,11 +17,8 @@ env:
     RAILS_LOG_TO_STDOUT: "1"
     RAILS_SERVE_STATIC_FILES: "1"
     SOLID_QUEUE_IN_PUMA: "true"
-  # 👇 Cargamos variables desde el archivo que YA creaste
   file:
     - .kamal/apps/recipe_book/env/roles/web.env
-  # ❌ Nada en secret aquí para DB o SECRET_KEY_BASE.
-  #    SECRET_KEY_BASE viene de credentials via RAILS_MASTER_KEY (en web.env).
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
@@ -33,9 +29,9 @@ aliases:
 accessories:
   db:
     image: postgres:16
-    host: 178.128.75.254
-    roles: [web]
-    port: "5432:5432"
+    # expone el puerto para que puedas probar desde fuera si quieres (psql)
+    ports:
+      - "5432:5432"
     env:
       clear:
         POSTGRES_USER: recipe
@@ -49,12 +45,6 @@ accessories:
 
 volumes:
   - "recipe_book_storage:/rails/storage"
-
-healthcheck:
-  path: /up
-  interval: 3s
-  timeout: 2s
-  retries: 10
 
 builder:
   arch: amd64
